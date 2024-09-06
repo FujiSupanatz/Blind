@@ -1,3 +1,4 @@
+//เอาไว้ test kub
 #include <WiFi.h>
 #include <TimeLib.h> // เอามาเทสเฉยๆ 
 #include "pitches.h"
@@ -6,10 +7,11 @@
 #define ECHO_PIN 14 // set ให้ trig คือ pin 12 echo 14 
 #define BUZZER_PIN 16
 #define THRESHOLD_DISTANCE 155.5
-#define MAX_FREQUENCY 1551 // Max frequency for the buzzer
-#define MIN_FREQUENCY 650
+#define MAX_FREQUENCY 2000 // Max frequency for the buzzer
+#define MIN_FREQUENCY 2000
 #define BUZZER_DURATION 200
-
+#define DELAY_MIN 50
+#define DELAY_MAX 1550
 // ประกาศfunction
 void showdetect();
 void soundBuzzer(int frequency,int duration);
@@ -37,7 +39,7 @@ float detect() { // function for ultrasonic
 }
 
 void showdetect()/*showdtect ให้ผู้ใช้รู้ว่าจะชน*/ {
-  float dis = detect();
+  float dis = detect(); // dis หมายถึง distance nakub
   
   if (dis <= THRESHOLD_DISTANCE) {
     // Display current time and distance on serial monitor
@@ -49,19 +51,18 @@ void showdetect()/*showdtect ให้ผู้ใช้รู้ว่าจะ
     Serial.print(second());
     Serial.print(" Distance: ");
     Serial.println(dis);
-
-    
-    // Calculate buzzer frequency based on distance
+    Serial.println("-------------------------------");
     int buzzerFrequency = map(dis, 0, THRESHOLD_DISTANCE, MAX_FREQUENCY, MIN_FREQUENCY);
     buzzerFrequency = constrain(buzzerFrequency, MIN_FREQUENCY, MAX_FREQUENCY);
-
-    // Calculate delay between buzzer sounds based on distance
-    int delayBetweenSounds = map(dis, 0, THRESHOLD_DISTANCE, 150, 1500);
-    delayBetweenSounds = constrain(delayBetweenSounds, 150, 1500);
-
-    // play sound
+    // Calculate delay between buzzer sounds with a more pronounced scale
+    float normalizedDistance = dis / THRESHOLD_DISTANCE;  // Normalized distance (0 to 1)
+    int delayBetweenSounds = DELAY_MIN + (DELAY_MAX - DELAY_MIN) * pow(normalizedDistance, 2); // Quadratic scaling
+    delayBetweenSounds = constrain(delayBetweenSounds, DELAY_MIN, DELAY_MAX);
+    
+    // Play sound
     soundBuzzer(buzzerFrequency, BUZZER_DURATION);
     delay(delayBetweenSounds); 
+
   } else {
     // Ensure buzzer is off if distance is greater than threshold
     soundBuzzer(0, 0);
