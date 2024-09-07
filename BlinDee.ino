@@ -1,4 +1,5 @@
 //เอาไว้ test kub
+//เอาๆปทำline notI ด้วยดส้จแล้วลบออก
 #include <WiFi.h>
 #include <TimeLib.h> // เอามาเทสเฉยๆ 
 #include "pitches.h"
@@ -6,12 +7,13 @@
 #define TRIG_PIN 2 
 #define ECHO_PIN 14 // set ให้ trig คือ pin 12 echo 14 
 #define BUZZER_PIN 16
+#define BUZZER_PIN2 17
 #define THRESHOLD_DISTANCE 155.5
-#define MAX_FREQUENCY 2000 // Max frequency for the buzzer
-#define MIN_FREQUENCY 2000
-#define BUZZER_DURATION 200
-#define DELAY_MIN 50
-#define DELAY_MAX 1550
+#define MAX_FREQUENCY 2000 // Max frequen
+#define MIN_FREQUENCY 1900
+#define BUZZER_DURATION 150 // มิลิวินาที ที่มันจะร้อง
+#define DELAY_MIN 100 // ยิ่งใกล้ยิ่งรัวงับ
+#define DELAY_MAX 1500
 // ประกาศfunction
 void showdetect();
 void soundBuzzer(int frequency,int duration);
@@ -21,7 +23,10 @@ void setup() {
   pinMode(TRIG_PIN, OUTPUT); // Set the Trigger pin as an output
   pinMode(ECHO_PIN, INPUT);  // Set the Echo pin as an input
   pinMode(BUZZER_PIN, OUTPUT); // Set the Buzzer pin as an output
-  digitalWrite(BUZZER_PIN, LOW);
+  digitalWrite(BUZZER_PIN, LOW); // BUZ1
+  //BUZ2
+  pinMode(BUZZER_PIN2, OUTPUT); // Set the Buzzer pin as an output
+  digitalWrite(BUZZER_PIN2, LOW);
   setTime(12, 0, 0, 1, 1, 2024);
 }
 
@@ -72,11 +77,14 @@ void showdetect()/*showdtect ให้ผู้ใช้รู้ว่าจะ
 
 void soundBuzzer(int frequency, int duration) {
 if (frequency > 0) {
-        tone(BUZZER_PIN, frequency); // Generate a tone at the specified frequency
-        delay(duration); // Keep buzzer on for the duration
-        noTone(BUZZER_PIN); // Turn off the buzzer
+         tone(BUZZER_PIN, frequency); // Generate a tone at the specified frequency for BUZZER1
+        tone(BUZZER_PIN2, frequency); // Generate a tone at the specified frequency for BUZZER2
+        delay(duration); // Keep buzzers on for the duration
+        noTone(BUZZER_PIN); // Turn off BUZZER1
+        noTone(BUZZER_PIN2);
     } else {
         noTone(BUZZER_PIN); // Ensure buzzer is off
+        noTone(BUZZER_PIN2);
     }
 }
 
