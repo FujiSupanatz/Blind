@@ -3,21 +3,29 @@
 #include <WiFi.h>
 #include <TimeLib.h> // เอามาเทสเฉยๆ 
 #include "pitches.h"
+#include <HTTPClient.h>
 
 #define TRIG_PIN 2 
 #define ECHO_PIN 14 // set ให้ trig คือ pin 12 echo 14 
 #define BUZZER_PIN 16
 #define BUZZER_PIN2 17
 #define THRESHOLD_DISTANCE 155.5
-#define MAX_FREQUENCY 2000 // Max frequen
-#define MIN_FREQUENCY 1900
+#define MAX_FREQUENCY 1700 // Max frequen
+#define MIN_FREQUENCY 1700
 #define BUZZER_DURATION 150 // มิลิวินาที ที่มันจะร้อง
-#define DELAY_MIN 100 // ยิ่งใกล้ยิ่งรัวงับ
+#define DELAY_MIN 250 // ยิ่งใกล้ยิ่งรัวงับ
 #define DELAY_MAX 1500
 // ประกาศfunction
 void showdetect();
 void soundBuzzer(int frequency,int duration);
+void lineSetup();
+void sendLineNotify(String message);
 
+const char* ssid = "Lita_2.4G";
+const char* password = "Fuji6275";
+
+String linetoken = "4cgZzRWh0Nk4RsTvTSrGQH9I9GtUTWeLexmuSWbfYAH"; //token เอาไว้ sent 
+//4cgZzRWh0Nk4RsTvTSrGQH9I9GtUTWeLexmuSWbfYAH
 void setup() {
   Serial.begin(115200);
   pinMode(TRIG_PIN, OUTPUT); // Set the Trigger pin as an output
@@ -27,7 +35,46 @@ void setup() {
   //BUZ2
   pinMode(BUZZER_PIN2, OUTPUT); // Set the Buzzer pin as an output
   digitalWrite(BUZZER_PIN2, LOW);
+  lineSetup();
   setTime(12, 0, 0, 1, 1, 2024);
+}
+
+void lineSetup(){
+  WiFi.begin(ssid, password);
+  while(WiFi.status() != WL_CONNECTED){
+    delay(5000);
+    Serial.println("Connecting to WIfi............................");
+  }
+  Serial.println("Connected to WIFI");
+
+  sendLineNotify("ESP32 connected successfully!");
+}
+
+void sendLineNotify(String message) {
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    
+    http.begin("https://notify-api.line.me/api/notify");  // LINE Notify API URL
+    http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    http.addHeader("Authorization", "Bearer " + linetoken);
+    
+    String postData = "message=" + message;
+    
+    int httpResponseCode = http.POST(postData);
+    
+    if (httpResponseCode > 0) {
+      String response = http.getString();
+      Serial.println(httpResponseCode);
+      Serial.println(response);
+    } else {
+      Serial.print("Error on sending POST: ");
+      Serial.println(httpResponseCode);
+    }
+    
+    http.end();
+  } else {
+    Serial.println("WiFi Disconnected");
+  }
 }
 
 float detect() { // function for ultrasonic 
@@ -90,4 +137,8 @@ if (frequency > 0) {
 
 void loop() {
   showdetect();
+  delay(10000);
+  float distance = detect();
+  String message = " " + String(distance) + " cm";
+  sendLineNotify(message);
 }
