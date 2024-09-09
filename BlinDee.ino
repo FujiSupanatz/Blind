@@ -21,8 +21,8 @@ void soundBuzzer(int frequency,int duration);
 void lineSetup();
 void sendLineNotify(String message);
 
-const char* ssid = "Lita_2.4G";
-const char* password = "Fuji6275";
+const char* ssid = " ";
+const char* password = " ";
 
 String linetoken = "4cgZzRWh0Nk4RsTvTSrGQH9I9GtUTWeLexmuSWbfYAH"; //token เอาไว้ sent 
 //4cgZzRWh0Nk4RsTvTSrGQH9I9GtUTWeLexmuSWbfYAH
