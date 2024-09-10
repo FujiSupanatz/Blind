@@ -1,14 +1,13 @@
-//เอาไว้ test kub
-//เอาๆปทำline notI ด้วยดส้จแล้วลบออก
+//BlinDee
 #include <WiFi.h>
 #include <TimeLib.h> // เอามาเทสเฉยๆ 
 #include "pitches.h"
 #include <HTTPClient.h>
+// ลบสิ่งที่ไม่ใช้ออกไป
 
 #define TRIG_PIN 2 
 #define ECHO_PIN 14 // set ให้ trig คือ pin 12 echo 14 
 #define BUZZER_PIN 16
-#define BUZZER_PIN2 17
 #define THRESHOLD_DISTANCE 155.5
 #define MAX_FREQUENCY 1700 // Max frequen
 #define MIN_FREQUENCY 1700
@@ -20,10 +19,13 @@ void showdetect();
 void soundBuzzer(int frequency,int duration);
 void lineSetup();
 void sendLineNotify(String message);
+void wificlient();
+void setupserver();
 
 const char* ssid = " ";
 const char* password = " ";
-
+WiFiServer server(80);
+// ip เซิฟ = 192.168.88.121
 String linetoken = "4cgZzRWh0Nk4RsTvTSrGQH9I9GtUTWeLexmuSWbfYAH"; //token เอาไว้ sent 
 //4cgZzRWh0Nk4RsTvTSrGQH9I9GtUTWeLexmuSWbfYAH
 void setup() {
@@ -32,21 +34,59 @@ void setup() {
   pinMode(ECHO_PIN, INPUT);  // Set the Echo pin as an input
   pinMode(BUZZER_PIN, OUTPUT); // Set the Buzzer pin as an output
   digitalWrite(BUZZER_PIN, LOW); // BUZ1
-  //BUZ2
-  pinMode(BUZZER_PIN2, OUTPUT); // Set the Buzzer pin as an output
-  digitalWrite(BUZZER_PIN2, LOW);
   lineSetup();
-  setTime(12, 0, 0, 1, 1, 2024);
+  setupserver();
+}
+void setupserver(){
+  WiFi.begin(ssid, password);
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("Connected to WiFi");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
+  server.begin();
+}
+
+void wificlient(){
+      WiFiClient client = server.available();
+   if (client) {
+      Serial.println("New client connected");
+      while (client.connected()) {
+         if (client.available()) {
+            String message = client.readStringUntil('\n');
+            Serial.println("get: " + message);
+            
+            // Check if the message received is "Twenty"
+            if (message.indexOf("Twenty") >= 0) {
+               sendLineNotify("แบงก์ยี่สิบ");
+            }
+            if (message.indexOf("Fifty") >= 0) {
+               sendLineNotify("แบงก์ห้าสิบ");
+            }
+            if (message.indexOf("Hundred") >= 0){
+              sendLineNotify("แบงก์ร้อย");
+            }
+            if (message.indexOf("car") >= 0){
+              sendLineNotify("รถสองแถว สายสีแดง ระยองอัสสัม");
+            }
+            client.println("Message received: " + message); // Send a response back to the client
+         }
+      }
+      client.stop();
+      Serial.println("Client disconnected!!");
+   }
 }
 
 void lineSetup(){
   WiFi.begin(ssid, password);
   while(WiFi.status() != WL_CONNECTED){
     delay(5000);
-    Serial.println("Connecting to WIfi............................");
+    Serial.println("Connecting to WIfi");
   }
   Serial.println("Connected to WIFI");
-
   sendLineNotify("ESP32 connected successfully!");
 }
 
@@ -75,6 +115,7 @@ void sendLineNotify(String message) {
   } else {
     Serial.println("WiFi Disconnected");
   }
+  delay(3000);
 }
 
 float detect() { // function for ultrasonic 
@@ -90,23 +131,20 @@ float detect() { // function for ultrasonic
     return distance;
 }
 
+
 void showdetect()/*showdtect ให้ผู้ใช้รู้ว่าจะชน*/ {
   float dis = detect(); // dis หมายถึง distance nakub
   
   if (dis <= THRESHOLD_DISTANCE) {
     // Display current time and distance on serial monitor
-    Serial.print("Current Time: ");
-    Serial.print(hour());
-    Serial.print(":");
-    Serial.print(minute());
-    Serial.print(":");
-    Serial.print(second());
     Serial.print(" Distance: ");
     Serial.println(dis);
     Serial.println("-------------------------------");
+    
+
     int buzzerFrequency = map(dis, 0, THRESHOLD_DISTANCE, MAX_FREQUENCY, MIN_FREQUENCY);
     buzzerFrequency = constrain(buzzerFrequency, MIN_FREQUENCY, MAX_FREQUENCY);
-    // Calculate delay between buzzer sounds with a more pronounced scale
+    // คำนวน
     float normalizedDistance = dis / THRESHOLD_DISTANCE;  // Normalized distance (0 to 1)
     int delayBetweenSounds = DELAY_MIN + (DELAY_MAX - DELAY_MIN) * pow(normalizedDistance, 2); // Quadratic scaling
     delayBetweenSounds = constrain(delayBetweenSounds, DELAY_MIN, DELAY_MAX);
@@ -125,20 +163,15 @@ void showdetect()/*showdtect ให้ผู้ใช้รู้ว่าจะ
 void soundBuzzer(int frequency, int duration) {
 if (frequency > 0) {
          tone(BUZZER_PIN, frequency); // Generate a tone at the specified frequency for BUZZER1
-        tone(BUZZER_PIN2, frequency); // Generate a tone at the specified frequency for BUZZER2
         delay(duration); // Keep buzzers on for the duration
         noTone(BUZZER_PIN); // Turn off BUZZER1
-        noTone(BUZZER_PIN2);
     } else {
         noTone(BUZZER_PIN); // Ensure buzzer is off
-        noTone(BUZZER_PIN2);
     }
 }
-
+//ง่
 void loop() {
   showdetect();
-  delay(10000);
-  float distance = detect();
-  String message = " " + String(distance) + " cm";
-  sendLineNotify(message);
+
+  wificlient();
 }
