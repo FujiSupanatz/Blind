@@ -22,12 +22,14 @@ void sendLineNotify(String message);
 void wificlient();
 void setupserver();
 
-const char* ssid = " ";
-const char* password = " ";
+const char* ssid = "Office_02";
+const char* password = "acr@1963";
 WiFiServer server(80);
-// ip เซิฟ = 192.168.88.121
-String linetoken = "4cgZzRWh0Nk4RsTvTSrGQH9I9GtUTWeLexmuSWbfYAH"; //token เอาไว้ sent 
+// ip เซิฟ = 172.20.10.3
+String linetoken = "IPtMFTV3wkbGrWjjCWR0pklvQON6n3OvWAZRwehpeVS"; //token เอาไว้ sent 
 //4cgZzRWh0Nk4RsTvTSrGQH9I9GtUTWeLexmuSWbfYAH
+
+// ไบล์นดี IPtMFTV3wkbGrWjjCWR0pklvQON6n3OvWAZRwehpeVS
 void setup() {
   Serial.begin(115200);
   pinMode(TRIG_PIN, OUTPUT); // Set the Trigger pin as an output
@@ -45,6 +47,7 @@ void setupserver(){
     Serial.print(".");
   }
   Serial.println("Connected to WiFi");
+  Serial.println(ssid);
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
   server.begin();
@@ -70,7 +73,7 @@ void wificlient(){
               sendLineNotify("แบงก์ร้อย");
             }
             if (message.indexOf("car") >= 0){
-              sendLineNotify("รถสองแถว สายสีแดง ระยองอัสสัม");
+              sendLineNotify("รถสองแถว สายสีขาว ตะพงหาดแม่รำพึง");
             }
             client.println("Message received: " + message); // Send a response back to the client
          }
@@ -172,6 +175,7 @@ if (frequency > 0) {
 //ง่
 void loop() {
   showdetect();
-
   wificlient();
+  //sendLineNotify("รถสองแถว สายสีขาว ตะพงหาดแม่รำพึง");
+  //delay(30000);
 }
