@@ -1,9 +1,9 @@
 //BlinDee
 #include <WiFi.h>
-#include <TimeLib.h> // เอามาเทสเฉยๆ 
+#include <TimeLib.h> 
 #include "pitches.h"
 #include <HTTPClient.h>
-// ลบสิ่งที่ไม่ใช้ออกไป
+
 
 #define TRIG_PIN 2 
 #define ECHO_PIN 14 // set ให้ trig คือ pin 12 echo 14 
@@ -26,8 +26,8 @@ const char* ssid = "Office_02";
 const char* password = "acr@1963";
 WiFiServer server(80);
 // ip เซิฟ = 172.20.10.3
-String linetoken = "IPtMFTV3wkbGrWjjCWR0pklvQON6n3OvWAZRwehpeVS"; //token เอาไว้ sent 
-//4cgZzRWh0Nk4RsTvTSrGQH9I9GtUTWeLexmuSWbfYAH
+String linetoken = ""; //token เอาไว้ sent 
+
 
 // ไบล์นดี IPtMFTV3wkbGrWjjCWR0pklvQON6n3OvWAZRwehpeVS
 void setup() {
